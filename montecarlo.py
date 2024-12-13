@@ -2,6 +2,7 @@ from typing import Literal
 
 import numpy as np
 
+from payout import Payout
 from put_call_parity import PutCallParity
 
 St = 500
@@ -24,32 +25,16 @@ class MonteCarlo:
         
         payout_list = []
         for _ in range(n):
+            ST = St*np.exp(self.sampled_return(t=t, rf=rf, q=q, vol=vol))
             if options_type == "put":
-                payout = self.put_payout(St=St, X=X, t=t, rf=rf, q=q, vol=vol)
+                payout = Payout().put_payout(ST=ST, X=X)
             elif options_type == "call":
-                payout = self.call_payout(St=St, X=X, t=t, rf=rf, q=q, vol=vol)
+                payout = Payout().call_payout(ST=ST, X=X)
             payout_list.append(payout)
             
         expected_payout = sum(payout_list)/len(payout_list)
         options_price = expected_payout*np.exp(-rf*t)
         return options_price
-    
-    def put_payout(self, St:float, X:float, t:float, rf:float, q:float, vol:float):
-        """
-        St: current stock price
-        X: strike price
-        """
-        sT = St*np.exp(self.sampled_return(t=t, rf=rf, q=q, vol=vol))
-        return max(X-sT, 0)
-    
-    
-    def call_payout(self, St:float, X:float, t:float, rf:float, q:float, vol:float):
-        """
-        St: current stock price
-        X: strike price
-        """
-        sT = St*np.exp(self.sampled_return(t=t, rf=rf, q=q, vol=vol))
-        return max(sT-X, 0)
     
     # get returns from 1 sample
     def sampled_return(self, t:float, rf:float, q:float, vol:float):
@@ -78,5 +63,8 @@ if __name__ == "__main__":
         call_price_mc = MC.simulate(options_type="call", n=n, St=St, X=X, t=t, rf=rf, q=q, vol=vol)
         print(f"Call premium from simulation:", call_price_mc)
         put_price_pcp = PCP.put_premium(C=call_price_mc, S0=St, X=X, rf=rf, q=q, t=t)
-        print(f"Put premium from put-call-parity:", put_price_mc)
+        print(f"Put premium from put-call-parity:", put_price_pcp)
+        
+        print("\nDifference in put simu price and pcp price =", put_price_mc - put_price_pcp)
+        print("Difference in call simu price and pcp price =", call_price_mc - call_price_pcp)
     
