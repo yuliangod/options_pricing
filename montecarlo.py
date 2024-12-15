@@ -65,6 +65,6 @@ if __name__ == "__main__":
         put_price_pcp = PCP.put_premium(C=call_price_mc, S0=St, X=X, rf=rf, q=q, t=t)
         print(f"Put premium from put-call-parity:", put_price_pcp)
         
-        print("\nDifference in put simu price and pcp price =", put_price_mc - put_price_pcp)
-        print("Difference in call simu price and pcp price =", call_price_mc - call_price_pcp)
+        print("\nDifference in put bt price and pcp price =", put_price_pcp - put_price_mc)
+        print("Difference in call bt price and pcp price =", call_price_pcp - call_price_mc)
     
